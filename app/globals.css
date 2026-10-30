@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-pine: #1b3a2f;
+  --color-pine-soft: #2c5346;
+  --color-paper: #f6f1e7;
+  --color-paper-2: #efe8d8;
+  --color-rust: #c45c26;
+  --color-rust-dark: #9a4519;
+  --color-ink: #1a1714;
+  --color-muted: #6b6458;
+  --color-line: #d9d0c0;
+  --color-good: #2f6f4e;
+  --font-sans: var(--font-source-sans);
+  --font-serif: var(--font-fraunces);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans), "Source Sans 3", system-ui, sans-serif;
+}
+
+::selection {
+  background: #e8c4ad;
+  color: var(--color-ink);
+}
+
+.masthead-rule {
+  border-top: 3px solid var(--color-pine);
+  border-bottom: 1px solid var(--color-pine);
+}
+
+.kicker {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--color-rust);
+}
+
+.paper-card {
+  background: #fffaf2;
+  border: 1px solid var(--color-line);
+}
+
+.score-track {
+  height: 6px;
+  background: var(--color-line);
+  overflow: hidden;
+}
+
+.score-fill {
+  height: 100%;
+  background: var(--color-pine);
+}
