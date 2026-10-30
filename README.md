@@ -1,0 +1,2 @@
+# minarbeidsplass
+Frontend minarbeidsplass
