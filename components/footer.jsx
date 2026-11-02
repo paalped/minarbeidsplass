@@ -19,7 +19,7 @@ export function Footer() {
             </li>
             <li>
               <Link href="/undersokelse" className="hover:underline">
-                Ta undersøkelsen
+                Undersøkelser
               </Link>
             </li>
             <li>

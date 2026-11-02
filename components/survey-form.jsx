@@ -1,34 +1,52 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CATEGORIES, LIKERT_LABELS } from "@/lib/site";
-import { questionsByCategory } from "@/lib/survey";
+import { LIKERT_LABELS, categoryLabel } from "@/lib/site";
+import {
+  isQuestionComplete,
+  isQuestionVisible,
+  otherKey,
+  questionsByCategory,
+  surveyCountsTowardRanking,
+} from "@/lib/survey";
 
 export function SurveyForm({ company, survey, existing }) {
   const router = useRouter();
-  const groups = useMemo(() => questionsByCategory(survey.survey_questions), [survey]);
+  const questions = survey.survey_questions ?? [];
+  const groups = useMemo(() => questionsByCategory(questions), [questions]);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState(existing?.answers ?? {});
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
 
-  const current = groups[step];
-  const isLast = step === groups.length - 1;
+  const visibleGroups = useMemo(
+    () =>
+      groups
+        .map((group) => ({
+          ...group,
+          questions: group.questions.filter((q) => isQuestionVisible(q, questions, answers)),
+        }))
+        .filter((group) => group.questions.length > 0),
+    [groups, questions, answers],
+  );
+
+  useEffect(() => {
+    if (step >= visibleGroups.length) setStep(Math.max(0, visibleGroups.length - 1));
+  }, [step, visibleGroups.length]);
+
+  const current = visibleGroups[Math.min(step, Math.max(0, visibleGroups.length - 1))];
+  const isLast = step >= visibleGroups.length - 1;
+  const counts = surveyCountsTowardRanking(survey);
 
   function setValue(id, value) {
     setAnswers((prev) => ({ ...prev, [id]: value }));
   }
 
   function canProceed() {
-    return current.questions
-      .filter((q) => q.required)
-      .every((q) =>
-        q.question_type === "likert"
-          ? typeof answers[q.id] === "number"
-          : String(answers[q.id] ?? "").length >= 0,
-      );
+    if (!current) return false;
+    return current.questions.every((q) => isQuestionComplete(q, questions, answers));
   }
 
   async function submit() {
@@ -61,8 +79,9 @@ export function SurveyForm({ company, survey, existing }) {
         <p className="kicker">Takk</p>
         <h2 className="mt-2 font-serif text-3xl">Svarene dine er inne</h2>
         <p className="mt-3 text-muted">
-          De teller i kåringen av {company.name}. Du kan oppdatere dem senere ved å ta undersøkelsen
-          på nytt.
+          {counts
+            ? `De teller i kåringen av ${company.name}. Du kan oppdatere dem senere ved å ta undersøkelsen på nytt.`
+            : `De bygger verktøykartet for ${company.name}, og teller ikke i kåringen. Du kan oppdatere dem senere.`}
         </p>
         <a href={`/bedrifter/${company.orgnr}`} className="mt-6 inline-block bg-pine px-5 py-2 text-paper">
           Tilbake til bedriften
@@ -71,7 +90,9 @@ export function SurveyForm({ company, survey, existing }) {
     );
   }
 
-  const categoryLabel = CATEGORIES.find((c) => c.key === current.key)?.label ?? current.key;
+  if (!current) return null;
+
+  const heading = categoryLabel(current.key);
 
   return (
     <form
@@ -84,60 +105,26 @@ export function SurveyForm({ company, survey, existing }) {
     >
       <div className="flex items-center justify-between gap-3 text-sm text-muted">
         <span>
-          Steg {step + 1} av {groups.length}
+          Steg {step + 1} av {visibleGroups.length}
         </span>
-        <span>{categoryLabel}</span>
+        <span>{heading}</span>
       </div>
       <div className="mt-3 h-1.5 bg-line">
         <div
           className="h-full bg-rust"
-          style={{ width: `${((step + 1) / groups.length) * 100}%` }}
+          style={{ width: `${((step + 1) / visibleGroups.length) * 100}%` }}
         />
       </div>
 
-      <h2 className="mt-6 font-serif text-3xl">{categoryLabel}</h2>
+      <h2 className="mt-6 font-serif text-3xl">{heading}</h2>
       <div className="mt-8 space-y-10">
         {current.questions.map((question) => (
-          <fieldset key={question.id}>
-            <legend className="text-lg leading-snug">{question.prompt}</legend>
-            {question.question_type === "likert" ? (
-              <div className="mt-4">
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((n) => {
-                    const selected = answers[question.id] === n;
-                    return (
-                      <button
-                        key={n}
-                        type="button"
-                        onClick={() => setValue(question.id, n)}
-                        className={`h-12 flex-1 border text-lg ${
-                          selected
-                            ? "border-pine bg-pine text-paper"
-                            : "border-line bg-white hover:border-pine"
-                        }`}
-                        aria-pressed={selected}
-                      >
-                        {n}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="mt-2 flex justify-between text-xs text-muted">
-                  <span>{LIKERT_LABELS[0]}</span>
-                  <span>{LIKERT_LABELS[4]}</span>
-                </div>
-              </div>
-            ) : (
-              <textarea
-                value={typeof answers[question.id] === "string" ? String(answers[question.id]) : ""}
-                onChange={(e) => setValue(question.id, e.target.value)}
-                rows={5}
-                maxLength={2000}
-                placeholder="Valgfritt"
-                className="mt-4 w-full border border-line bg-white px-3 py-2"
-              />
-            )}
-          </fieldset>
+          <QuestionField
+            key={question.id}
+            question={question}
+            answers={answers}
+            onChange={setValue}
+          />
         ))}
       </div>
 
@@ -160,5 +147,113 @@ export function SurveyForm({ company, survey, existing }) {
       </div>
       {error ? <p className="mt-4 text-sm text-rust">{error}</p> : null}
     </form>
+  );
+}
+
+function QuestionField({ question, answers, onChange }) {
+  const options = question.settings?.options ?? [];
+  const extra = answers[otherKey(question.id)] ?? "";
+  const showOther =
+    question.settings?.allow_other &&
+    (question.question_type === "single"
+      ? answers[question.id] === "annet"
+      : Array.isArray(answers[question.id]) && answers[question.id].includes("annet"));
+
+  return (
+    <fieldset>
+      <legend className="text-lg leading-snug">{question.prompt}</legend>
+      {question.question_type === "likert" ? (
+        <div className="mt-4">
+          <div className="flex gap-2">
+            {[1, 2, 3, 4, 5].map((n) => {
+              const selected = answers[question.id] === n;
+              return (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => onChange(question.id, n)}
+                  className={`h-12 flex-1 border text-lg ${
+                    selected
+                      ? "border-pine bg-pine text-paper"
+                      : "border-line bg-white hover:border-pine"
+                  }`}
+                  aria-pressed={selected}
+                >
+                  {n}
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-2 flex justify-between text-xs text-muted">
+            <span>{LIKERT_LABELS[0]}</span>
+            <span>{LIKERT_LABELS[4]}</span>
+          </div>
+        </div>
+      ) : question.question_type === "single" ? (
+        <div className="mt-4 grid gap-2">
+          {options.map((option) => {
+            const selected = answers[question.id] === option.value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => onChange(question.id, option.value)}
+                className={`border px-4 py-3 text-left ${
+                  selected ? "border-pine bg-pine text-paper" : "border-line bg-white hover:border-pine"
+                }`}
+                aria-pressed={selected}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      ) : question.question_type === "multi" ? (
+        <div className="mt-4 grid gap-2">
+          {options.map((option) => {
+            const selected = Array.isArray(answers[question.id])
+              ? answers[question.id].includes(option.value)
+              : false;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  const current = Array.isArray(answers[question.id]) ? answers[question.id] : [];
+                  const next = selected
+                    ? current.filter((v) => v !== option.value)
+                    : [...current, option.value];
+                  onChange(question.id, next);
+                }}
+                className={`border px-4 py-3 text-left ${
+                  selected ? "border-pine bg-pine text-paper" : "border-line bg-white hover:border-pine"
+                }`}
+                aria-pressed={selected}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <textarea
+          value={typeof answers[question.id] === "string" ? answers[question.id] : ""}
+          onChange={(e) => onChange(question.id, e.target.value)}
+          rows={5}
+          maxLength={2000}
+          placeholder={question.required ? "Skriv her" : "Valgfritt"}
+          className="mt-4 w-full border border-line bg-white px-3 py-2"
+        />
+      )}
+      {showOther ? (
+        <input
+          value={typeof extra === "string" ? extra : ""}
+          onChange={(e) => onChange(otherKey(question.id), e.target.value)}
+          placeholder="Hva heter det?"
+          maxLength={120}
+          className="mt-3 h-11 w-full border border-line bg-white px-3"
+        />
+      ) : null}
+    </fieldset>
   );
 }

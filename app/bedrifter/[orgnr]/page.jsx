@@ -4,9 +4,10 @@ import { GossipFeed } from "@/components/gossip-feed";
 import { GossipForm } from "@/components/gossip-form";
 import { PageShell } from "@/components/page-shell";
 import { ScoreBadge, ScoreBar } from "@/components/score-badge";
-import { ensureCompany, getCompanyStats, getPosts, getSessionUser } from "@/lib/data";
+import { ensureCompany, getCompanyStats, getPosts, getSessionUser, getSurveys } from "@/lib/data";
 import { formatNumber, formatOrgnr } from "@/lib/format";
 import { CATEGORIES } from "@/lib/site";
+import { surveyCountsTowardRanking } from "@/lib/survey";
 
 export async function generateMetadata({ params }) {
   const { orgnr } = await params;
@@ -20,10 +21,11 @@ export default async function CompanyPage({ params }) {
   const company = await ensureCompany(orgnr);
   if (!company) notFound();
 
-  const [stats, posts, user] = await Promise.all([
+  const [stats, posts, user, surveys] = await Promise.all([
     getCompanyStats(company.orgnr),
     getPosts(company.orgnr),
     getSessionUser(),
+    getSurveys(),
   ]);
 
   const categoryScores = stats ? categoryEntries(stats) : [];
@@ -46,12 +48,26 @@ export default async function CompanyPage({ params }) {
               .join(" · ")}
           </p>
         </div>
-        <Link
-          href={`/undersokelse/${company.orgnr}`}
-          className="inline-flex h-12 items-center justify-center bg-rust px-5 text-paper hover:bg-rust-dark"
-        >
-          Ta undersøkelsen
-        </Link>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          {(surveys.length > 0 ? surveys : [{ slug: "arbeidsplass-2026", title: "Ta undersøkelsen", counts_toward_ranking: true }]).map(
+            (survey) => {
+              const ranking = surveyCountsTowardRanking(survey);
+              return (
+                <Link
+                  key={survey.slug}
+                  href={`/undersokelse/${survey.slug}/${company.orgnr}`}
+                  className={
+                    ranking
+                      ? "inline-flex h-12 items-center justify-center bg-rust px-5 text-paper hover:bg-rust-dark"
+                      : "inline-flex h-12 items-center justify-center border border-pine px-5 text-pine hover:bg-paper-2"
+                  }
+                >
+                  {survey.title}
+                </Link>
+              );
+            },
+          )}
+        </div>
       </div>
 
       <section className="mt-10 grid gap-8 lg:grid-cols-[1.1fr_1fr]">

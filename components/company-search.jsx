@@ -4,7 +4,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { formatOrgnr } from "@/lib/format";
 
-export function CompanySearch({ intent = "view", size = "lg", autoFocus = false }) {
+export function CompanySearch({
+  intent = "view",
+  surveySlug = "arbeidsplass-2026",
+  size = "lg",
+  autoFocus = false,
+}) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
@@ -47,6 +52,12 @@ export function CompanySearch({ intent = "view", size = "lg", autoFocus = false 
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
+  function dest(orgnr) {
+    return intent === "survey"
+      ? `/undersokelse/${surveySlug}/${orgnr}`
+      : `/bedrifter/${orgnr}`;
+  }
+
   async function goToCompany(company) {
     setSaving(true);
     setError(null);
@@ -59,17 +70,12 @@ export function CompanySearch({ intent = "view", size = "lg", autoFocus = false 
       const json = await res.json();
       if (!res.ok || !json.company) {
         if (company.source === "brreg") {
-          router.push(
-            intent === "survey" ? `/undersokelse/${company.orgnr}` : `/bedrifter/${company.orgnr}`,
-          );
+          router.push(dest(company.orgnr));
           return;
         }
         throw new Error(json.error ?? "Kunne ikke lagre bedriften.");
       }
-      const path =
-        intent === "survey"
-          ? `/undersokelse/${json.company.orgnr}`
-          : `/bedrifter/${json.company.orgnr}`;
+      const path = dest(json.company.orgnr);
       router.push(path);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Noe gikk galt.");
