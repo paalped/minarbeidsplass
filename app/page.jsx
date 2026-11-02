@@ -2,11 +2,27 @@ import Link from "next/link";
 import { CompanySearch } from "@/components/company-search";
 import { NewsCard } from "@/components/news-card";
 import { RankingList } from "@/components/ranking-list";
-import { getNews, getRankings } from "@/lib/data";
+import { getNews, getRankings, getSurveys } from "@/lib/data";
 import { site } from "@/lib/site";
+import { surveyCountsTowardRanking } from "@/lib/survey";
+
+const defaultSurveyCards = [
+  {
+    slug: "arbeidsplass-2026",
+    title: "Arbeidsplassundersøkelsen",
+    teaser: "Ledelse, miljø, lønn, balanse, utvikling, kultur og anbefaling.",
+    counts_toward_ranking: true,
+  },
+  {
+    slug: "verktoy-2026",
+    title: "Verktøy og systemer",
+    teaser: "Timesystem, GIS, CAD, kjernesystem, hyllevare vs egenutvikling.",
+    counts_toward_ranking: false,
+  },
+];
 
 export default async function HomePage() {
-  const [rankings, news] = await Promise.all([getRankings(5), getNews(4)]);
+  const [rankings, news, surveys] = await Promise.all([getRankings(5), getNews(4), getSurveys()]);
   const featured = news[0];
   const rest = news.slice(1);
   const today = new Intl.DateTimeFormat("nb-NO", {
@@ -72,20 +88,29 @@ export default async function HomePage() {
 
       <section className="mt-16 bg-pine py-12 text-paper">
         <div className="mx-auto max-w-6xl px-4 sm:px-10">
-          <p className="kicker text-paper-2">Undersøkelsen</p>
+          <p className="kicker text-paper-2">Undersøkelser</p>
           <h2 className="mt-2 max-w-2xl font-serif text-3xl sm:text-4xl">
-            23 spørsmål. Syv kategorier. Én plassering.
+            Si hvordan det er å jobbe der — og i hvilke systemer.
           </h2>
           <p className="mt-4 max-w-xl text-paper-2">
-            Ledelse, miljø, lønn, balanse, utvikling, kultur og om du ville anbefalt stedet.
-            Innlogging med magisk lenke — så stemmen din teller bare én gang per bedrift.
+            Arbeidsplassundersøkelsen avgjør kåringen. Verktøyundersøkelsen kartlegger timesystem,
+            GIS, CAD og kjernesystemet, uten å røre plasseringen.
           </p>
-          <Link
-            href="/undersokelse"
-            className="mt-6 inline-block bg-rust px-5 py-3 text-sm font-medium hover:bg-rust-dark"
-          >
-            Ta undersøkelsen
-          </Link>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            {(surveys.length > 0 ? surveys : defaultSurveyCards).map((survey) => (
+              <Link
+                key={survey.slug}
+                href={`/undersokelse/${survey.slug}`}
+                className="border border-paper/30 p-5 hover:bg-pine-soft"
+              >
+                <p className="text-xs uppercase tracking-wide text-paper-2">
+                  {surveyCountsTowardRanking(survey) ? "Teller i kåringen" : "Teller ikke i kåringen"}
+                </p>
+                <p className="mt-2 font-serif text-2xl">{survey.title}</p>
+                <p className="mt-2 text-sm text-paper-2">{survey.teaser ?? survey.description}</p>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
     </div>

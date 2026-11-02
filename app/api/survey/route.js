@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { ensureCompany, getActiveSurvey } from "@/lib/data";
+import { ensureCompany, getSurveyById } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
-import { scoreAnswers } from "@/lib/survey";
+import { isQuestionComplete, sanitizeAnswers, scoreAnswers } from "@/lib/survey";
 
 export async function POST(request) {
   const supabase = await createClient();
@@ -18,8 +18,8 @@ export async function POST(request) {
 
   const body = await request.json();
 
-  const survey = await getActiveSurvey();
-  if (!survey || survey.id !== body.survey_id) {
+  const survey = await getSurveyById(body.survey_id);
+  if (!survey) {
     return NextResponse.json({ error: "Ugyldig undersøkelse." }, { status: 400 });
   }
 
@@ -28,15 +28,12 @@ export async function POST(request) {
     return NextResponse.json({ error: "Fant ikke bedriften." }, { status: 404 });
   }
 
-  const answers = body.answers ?? {};
-  for (const question of survey.survey_questions) {
-    if (question.question_type !== "likert") continue;
-    const value = answers[question.id];
-    if (typeof value !== "number" || value < 1 || value > 5) {
-      if (question.required) {
-        return NextResponse.json({ error: "Alle påkrevde spørsmål må besvares." }, { status: 400 });
-      }
-    }
+  const answers = sanitizeAnswers(survey.survey_questions, body.answers ?? {});
+  const incomplete = survey.survey_questions.filter(
+    (question) => !isQuestionComplete(question, survey.survey_questions, answers),
+  );
+  if (incomplete.length > 0) {
+    return NextResponse.json({ error: "Alle påkrevde spørsmål må besvares." }, { status: 400 });
   }
 
   let scores;

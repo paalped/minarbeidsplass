@@ -8,7 +8,7 @@ const links = [
   { href: "/karing", label: "Kåring" },
   { href: "/nyheter", label: "Nyheter" },
   { href: "/chat", label: "Chat" },
-  { href: "/undersokelse", label: "Undersøkelse" },
+  { href: "/undersokelse", label: "Undersøkelser" },
 ];
 
 export function Header({ user }) {

@@ -3,36 +3,30 @@ import { notFound } from "next/navigation";
 import { LoginForm } from "@/components/login-form";
 import { PageShell } from "@/components/page-shell";
 import { SurveyForm } from "@/components/survey-form";
-import {
-  ensureCompany,
-  getActiveSurvey,
-  getSessionUser,
-  getSurveyResponse,
-} from "@/lib/data";
+import { ensureCompany, getSessionUser, getSurveyBySlug, getSurveyResponse } from "@/lib/data";
+import { surveyCountsTowardRanking } from "@/lib/survey";
 
-export const metadata = { title: "Undersøkelse" };
+export async function generateMetadata({ params }) {
+  const { survey: slug } = await params;
+  const survey = await getSurveyBySlug(decodeURIComponent(slug));
+  return { title: survey?.title ?? "Undersøkelse" };
+}
 
 export default async function SurveyPage({ params }) {
-  const { orgnr: raw } = await params;
+  const { survey: slug, orgnr: raw } = await params;
   const orgnr = decodeURIComponent(raw);
+  const surveySlug = decodeURIComponent(slug);
+
   const [company, survey, user] = await Promise.all([
     ensureCompany(orgnr),
-    getActiveSurvey(),
+    getSurveyBySlug(surveySlug),
     getSessionUser(),
   ]);
 
-  if (!company) notFound();
+  if (!company || !survey) notFound();
 
-  if (!survey) {
-    return (
-      <PageShell>
-        <h1 className="font-serif text-3xl">Undersøkelsen er ikke klar</h1>
-        <p className="mt-3 text-muted">Kjør SQL-migrasjonen i Supabase for å laste inn spørsmålene.</p>
-      </PageShell>
-    );
-  }
-
-  const nextPath = `/undersokelse/${company.orgnr}`;
+  const nextPath = `/undersokelse/${survey.slug}/${company.orgnr}`;
+  const counts = surveyCountsTowardRanking(survey);
 
   if (!user) {
     return (
@@ -41,7 +35,9 @@ export default async function SurveyPage({ params }) {
           <p className="kicker">Innlogging kreves</p>
           <h1 className="mt-2 font-serif text-3xl">Logg inn for å svare om {company.name}</h1>
           <p className="mt-3 mb-8 text-muted">
-            Lesing og sladder er åpent. Undersøkelsen teller i kåringen, derfor magisk lenke på e-post.
+            {counts
+              ? "Lesing og sladder er åpent. Undersøkelsen teller i kåringen, derfor magisk lenke på e-post."
+              : "Lesing og sladder er åpent. Verktøysvarene er knyttet til deg, derfor magisk lenke på e-post."}
           </p>
           <LoginForm nextPath={nextPath} />
         </div>
@@ -54,13 +50,16 @@ export default async function SurveyPage({ params }) {
   return (
     <PageShell>
       <div className="mx-auto max-w-2xl">
-        <p className="kicker">Undersøkelse</p>
+        <p className="kicker">{survey.title}</p>
         <h1 className="mt-2 font-serif text-4xl">{company.name}</h1>
         <p className="mt-3 text-muted">{survey.description}</p>
         {existing ? (
           <p className="mt-4 text-sm text-good">
-            Du har svart før (snitt {existing.overall_score.toFixed(1).replace(".", ",")}). Du kan
-            oppdatere svarene under.
+            Du har svart før
+            {typeof existing.overall_score === "number" && existing.overall_score > 0
+              ? ` (snitt ${existing.overall_score.toFixed(1).replace(".", ",")})`
+              : ""}
+            . Du kan oppdatere svarene under.
           </p>
         ) : null}
         <p className="mt-2 mb-8 text-sm">
