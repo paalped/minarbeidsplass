@@ -13,6 +13,7 @@ const links = [
 
 export function Header({ user }) {
   const [open, setOpen] = useState(false);
+  const nav = user?.isAdmin ? [...links, { href: "/admin", label: "Admin" }] : links;
 
   return (
     <header className="sticky top-0 z-40 bg-pine text-paper">
@@ -23,7 +24,7 @@ export function Header({ user }) {
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm md:flex">
-          {links.map((link) => (
+          {nav.map((link) => (
             <Link key={link.href} href={link.href} className="hover:text-paper-2">
               {link.label}
             </Link>
@@ -65,7 +66,7 @@ export function Header({ user }) {
       {open ? (
         <div className="border-t border-pine-soft px-4 py-4 md:hidden">
           <nav className="flex flex-col gap-3 text-base">
-            {links.map((link) => (
+            {nav.map((link) => (
               <Link key={link.href} href={link.href} onClick={() => setOpen(false)}>
                 {link.label}
               </Link>
