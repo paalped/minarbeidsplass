@@ -24,7 +24,8 @@ returns trigger
 language plpgsql
 as $$
 begin
-  if new.is_admin is distinct from old.is_admin then
+  -- auth.uid() er satt via appen, men null i SQL-editoren.
+  if new.is_admin is distinct from old.is_admin and auth.uid() is not null then
     raise exception 'is_admin kan bare endres i SQL-editoren';
   end if;
   return new;
