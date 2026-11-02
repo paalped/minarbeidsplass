@@ -48,7 +48,7 @@ export default async function CompanyPage({ params }) {
               .join(" · ")}
           </p>
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex w-fit shrink-0 flex-col gap-2 sm:flex-row">
           {(surveys.length > 0 ? surveys : [{ slug: "arbeidsplass-2026", title: "Ta undersøkelsen", counts_toward_ranking: true }]).map(
             (survey) => {
               const ranking = surveyCountsTowardRanking(survey);
@@ -58,8 +58,8 @@ export default async function CompanyPage({ params }) {
                   href={`/undersokelse/${survey.slug}/${company.orgnr}`}
                   className={
                     ranking
-                      ? "inline-flex h-12 items-center justify-center bg-rust px-5 text-paper hover:bg-rust-dark"
-                      : "inline-flex h-12 items-center justify-center border border-pine px-5 text-pine hover:bg-paper-2"
+                      ? "inline-flex h-12 shrink-0 items-center justify-center whitespace-nowrap bg-rust px-5 text-paper hover:bg-rust-dark"
+                      : "inline-flex h-12 shrink-0 items-center justify-center whitespace-nowrap border border-pine bg-paper px-5 text-pine hover:bg-paper-2"
                   }
                 >
                   {survey.title}
