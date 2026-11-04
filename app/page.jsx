@@ -56,7 +56,8 @@ export default async function HomePage() {
           <p className="mt-4 max-w-xl text-muted">
             Bytter du jobb, eller lurer du på arbeidsmiljøet? Vi slår opp bedriften i
             Brønnøysundregistrene. Les sladder, se scoren, og ta arbeidsplassundersøkelsen.
-            Kåringen av Norges beste arbeidsplass styres av svarene.
+            Med arbeidstil-testen ser du om stedet matcher deg. Kåringen styres av de andre
+            svarene.
           </p>
         </div>
         <CompanySearch />

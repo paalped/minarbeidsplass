@@ -1,11 +1,20 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { FitMatchCard } from "@/components/fit-match-card";
 import { GossipFeed } from "@/components/gossip-feed";
 import { GossipForm } from "@/components/gossip-form";
 import { PageShell } from "@/components/page-shell";
 import { ScoreBadge, ScoreBar } from "@/components/score-badge";
 import { JsonLd } from "@/components/json-ld";
-import { ensureCompany, getCompanyStats, getCvEntries, getPosts, getSessionUser, getSurveys } from "@/lib/data";
+import {
+  ensureCompany,
+  getCompanyCulture,
+  getCompanyStats,
+  getCvEntries,
+  getPosts,
+  getSessionUser,
+  getSurveys,
+} from "@/lib/data";
 import { formatNumber, formatOrgnr } from "@/lib/format";
 import { cvRelation } from "@/lib/cv";
 import { companyJsonLd, pageMetadata } from "@/lib/seo";
@@ -35,11 +44,12 @@ export default async function CompanyPage({ params }) {
   const company = await ensureCompany(orgnr);
   if (!company) notFound();
 
-  const [stats, posts, user, surveys] = await Promise.all([
+  const [stats, posts, user, surveys, culture] = await Promise.all([
     getCompanyStats(company.orgnr),
     getPosts(company.orgnr),
     getSessionUser(),
     getSurveys(),
+    getCompanyCulture(company.orgnr),
   ]);
   const relation = user ? cvRelation(await getCvEntries(user.id), company.orgnr) : "none";
   const canSurvey = relation === "previous";
@@ -138,6 +148,13 @@ export default async function CompanyPage({ params }) {
           </div>
         </div>
       </section>
+
+      <FitMatchCard
+        companyName={company.name}
+        workStyle={user?.workStyle ?? null}
+        culture={culture}
+        loggedIn={Boolean(user)}
+      />
     </PageShell>
   );
 }

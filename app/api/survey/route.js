@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cvRelation } from "@/lib/cv";
 import { ensureCompany, getCvEntries, getSurveyById } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
+import { extractFitScores } from "@/lib/fit";
 import { isQuestionComplete, sanitizeAnswers, scoreAnswers } from "@/lib/survey";
 
 export async function POST(request) {
@@ -68,6 +69,7 @@ export async function POST(request) {
     answers,
     overall_score: scores.overall_score,
     category_scores: scores.category_scores,
+    fit_scores: extractFitScores(survey.survey_questions, answers),
   };
 
   const { data, error } = await supabase

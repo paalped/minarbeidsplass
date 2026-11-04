@@ -22,8 +22,9 @@ export default async function SurveyIndexPage() {
       </h1>
       <p className="mt-4 max-w-2xl text-muted">
         Si hvordan det faktisk er å jobbe der du jobber. Svarene om ledelse, arbeidsmiljø, lønn,
-        balanse, utvikling og kultur styrer Norges beste arbeidsplass. Verktøyundersøkelsen
-        kartlegger timesystem, GIS, CAD og kjernesystem — og teller ikke i kåringen.
+        balanse, utvikling og kultur styrer Norges beste arbeidsplass. Seks spørsmål om hvordan
+        stedet faktisk er (autonomi, tempo, samarbeid) brukes bare til match, ikke til kåringen.
+        Verktøyundersøkelsen kartlegger timesystem, GIS, CAD og kjernesystem.
       </p>
       <p className="mt-3 max-w-2xl text-muted">
         {user

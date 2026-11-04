@@ -184,9 +184,9 @@ function QuestionField({ question, answers, onChange }) {
               );
             })}
           </div>
-          <div className="mt-2 flex justify-between text-xs text-muted">
-            <span>{LIKERT_LABELS[0]}</span>
-            <span>{LIKERT_LABELS[4]}</span>
+          <div className="mt-2 flex justify-between gap-4 text-xs text-muted">
+            <span>{question.settings?.poles?.low ?? LIKERT_LABELS[0]}</span>
+            <span className="text-right">{question.settings?.poles?.high ?? LIKERT_LABELS[4]}</span>
           </div>
         </div>
       ) : question.question_type === "single" ? (

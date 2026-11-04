@@ -2,6 +2,7 @@ import { CurrentSection, PreviousSection } from "@/components/cv-sections";
 import { LoginGate } from "@/components/login-gate";
 import { PageShell } from "@/components/page-shell";
 import { ProfileNameForm } from "@/components/profile-name-form";
+import { WorkStyleForm } from "@/components/work-style-form";
 import { currentWorkplace, previousEntries } from "@/lib/cv";
 import { getCvEntries, getSessionUser } from "@/lib/data";
 import { pageMetadata } from "@/lib/seo";
@@ -9,7 +10,7 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata = pageMetadata({
   title: "Profil og CV",
   description:
-    "Legg inn nåværende og tidligere arbeidsplasser. Undersøkelsen er bare åpen for jobber du har sluttet i.",
+    "Legg inn CV og ta en treminutters arbeidstil-test. Undersøkelsen er bare åpen for jobber du har sluttet i.",
   path: "/profil",
   index: false,
 });
@@ -43,6 +44,15 @@ export default async function ProfilePage() {
       <section className="mt-10">
         <h2 className="font-serif text-2xl">Kallenavn</h2>
         <ProfileNameForm displayName={user.displayName} />
+      </section>
+
+      <section id="arbeidsstil" className="mt-10 scroll-mt-24">
+        <h2 className="font-serif text-2xl">Arbeidstil</h2>
+        <p className="mt-2 max-w-2xl text-muted">
+          Seks spørsmål, tre minutter. Vi matcher deg mot hvordan folk beskriver stedet — ikke mot
+          et generelt terningkast. Kåringen er uendret.
+        </p>
+        <WorkStyleForm initial={user.workStyle} />
       </section>
 
       <CurrentSection current={current} />
