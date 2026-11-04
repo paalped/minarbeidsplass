@@ -3,17 +3,24 @@
 import Link from "next/link";
 import { useState } from "react";
 
-const links = [
+const publicLinks = [
   { href: "/bedrifter", label: "Bedrifter" },
   { href: "/karing", label: "Kåring" },
   { href: "/nyheter", label: "Nyheter" },
-  { href: "/chat", label: "Chat" },
+];
+
+const memberLinks = [
   { href: "/undersokelse", label: "Undersøkelser" },
+  { href: "/chat", label: "Chat" },
 ];
 
 export function Header({ user }) {
   const [open, setOpen] = useState(false);
-  const nav = user?.isAdmin ? [...links, { href: "/admin", label: "Admin" }] : links;
+  const nav = [
+    ...publicLinks,
+    ...(user ? memberLinks : []),
+    ...(user?.isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
+  ];
 
   return (
     <header className="sticky top-0 z-40 bg-pine text-paper">

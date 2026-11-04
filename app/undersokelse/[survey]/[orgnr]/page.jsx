@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LoginForm } from "@/components/login-form";
+import { LoginGate } from "@/components/login-gate";
 import { PageShell } from "@/components/page-shell";
 import { SurveyForm } from "@/components/survey-form";
 import { ensureCompany, getSessionUser, getSurveyBySlug, getSurveyResponse } from "@/lib/data";
@@ -30,18 +30,15 @@ export default async function SurveyPage({ params }) {
 
   if (!user) {
     return (
-      <PageShell>
-        <div className="mx-auto max-w-lg">
-          <p className="kicker">Innlogging kreves</p>
-          <h1 className="mt-2 font-serif text-3xl">Logg inn for å svare om {company.name}</h1>
-          <p className="mt-3 mb-8 text-muted">
-            {counts
-              ? "Lesing og sladder er åpent. Undersøkelsen teller i kåringen, derfor magisk lenke på e-post."
-              : "Lesing og sladder er åpent. Verktøysvarene er knyttet til deg, derfor magisk lenke på e-post."}
-          </p>
-          <LoginForm nextPath={nextPath} />
-        </div>
-      </PageShell>
+      <LoginGate
+        title={`Logg inn for å svare om ${company.name}`}
+        description={
+          counts
+            ? "Undersøkelsen teller i kåringen, derfor magisk lenke på e-post. Lesing og sladder på bedriftssiden er fortsatt åpent."
+            : "Verktøysvarene er knyttet til deg, derfor magisk lenke på e-post. Lesing og sladder på bedriftssiden er fortsatt åpent."
+        }
+        nextPath={nextPath}
+      />
     );
   }
 

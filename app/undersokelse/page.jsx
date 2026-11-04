@@ -1,18 +1,30 @@
 import Link from "next/link";
+import { LoginGate } from "@/components/login-gate";
 import { PageShell } from "@/components/page-shell";
-import { getSurveys } from "@/lib/data";
+import { getSessionUser, getSurveys } from "@/lib/data";
 import { surveyCountsTowardRanking } from "@/lib/survey";
 
 export const metadata = { title: "Undersøkelser" };
 
 export default async function SurveyIndexPage() {
+  const user = await getSessionUser();
+  if (!user) {
+    return (
+      <LoginGate
+        title="Logg inn for å ta undersøkelsene"
+        description="Undersøkelser og chat er for innloggede. Sladder på bedriftssiden er fortsatt åpent og anonymt."
+        nextPath="/undersokelse"
+      />
+    );
+  }
+
   const surveys = await getSurveys();
 
   return (
     <PageShell>
       <p className="kicker">Undersøkelser</p>
       <h1 className="mt-2 max-w-2xl font-serif text-4xl leading-tight">
-            To spørsmålssett. Én kåring.
+        To spørsmålssett. Én kåring.
       </h1>
       <p className="mt-4 max-w-xl text-muted">
         Arbeidsplassundersøkelsen styrer Norges beste arbeidsplass. Verktøyundersøkelsen kartlegger
