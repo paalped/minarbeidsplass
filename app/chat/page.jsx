@@ -1,5 +1,5 @@
 import { ChatRoom } from "@/components/chat-room";
-import { LoginForm } from "@/components/login-form";
+import { LoginGate } from "@/components/login-gate";
 import { PageShell } from "@/components/page-shell";
 import { getChatMessages, getSessionUser } from "@/lib/data";
 
@@ -10,17 +10,12 @@ export default async function ChatPage() {
 
   if (!user) {
     return (
-      <PageShell>
-        <div className="mx-auto max-w-lg">
-          <p className="kicker">Sladderrommet</p>
-          <h1 className="mt-2 font-serif text-3xl">Logg inn for å chatte</h1>
-          <p className="mt-3 mb-8 text-muted">
-            Ett felles rom. Innlogging holder de verste spøkelsene unna. Sladder på bedriftssiden er
-            fortsatt anonym.
-          </p>
-          <LoginForm nextPath="/chat" />
-        </div>
-      </PageShell>
+      <LoginGate
+        kicker="Sladderrommet"
+        title="Logg inn for å chatte"
+        description="Chat er for innloggede. Sladder på bedriftssiden er fortsatt åpent og anonymt."
+        nextPath="/chat"
+      />
     );
   }
 

@@ -1,7 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { CompanySearch } from "@/components/company-search";
+import { LoginGate } from "@/components/login-gate";
 import { PageShell } from "@/components/page-shell";
-import { getSurveyBySlug } from "@/lib/data";
+import { getSessionUser, getSurveyBySlug } from "@/lib/data";
 import { looksLikeCompanyKey } from "@/lib/format";
 import { surveyCountsTowardRanking } from "@/lib/survey";
 
@@ -18,6 +19,17 @@ export default async function SurveyCompanyPickPage({ params }) {
 
   if (looksLikeCompanyKey(decoded)) {
     redirect(`/undersokelse/arbeidsplass-2026/${decoded}`);
+  }
+
+  const user = await getSessionUser();
+  if (!user) {
+    return (
+      <LoginGate
+        title="Logg inn for å ta undersøkelsen"
+        description="Undersøkelser er for innloggede. Du kommer tilbake hit etter magisk lenke."
+        nextPath={`/undersokelse/${decoded}`}
+      />
+    );
   }
 
   const survey = await getSurveyBySlug(decoded);

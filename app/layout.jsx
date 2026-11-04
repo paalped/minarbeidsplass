@@ -35,7 +35,7 @@ export default async function RootLayout({ children }) {
         <SetupBanner />
         <Header user={user} />
         <main className="min-h-[70vh]">{children}</main>
-        <Footer />
+        <Footer user={user} />
       </body>
     </html>
   );

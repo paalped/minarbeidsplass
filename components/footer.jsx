@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { site } from "@/lib/site";
 
-export function Footer() {
+export function Footer({ user }) {
   return (
     <footer className="mt-20 bg-pine text-paper">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-3">
@@ -17,19 +17,23 @@ export function Footer() {
                 Norges beste arbeidsplass
               </Link>
             </li>
-            <li>
-              <Link href="/undersokelse" className="hover:underline">
-                Undersøkelser
-              </Link>
-            </li>
+            {user ? (
+              <>
+                <li>
+                  <Link href="/undersokelse" className="hover:underline">
+                    Undersøkelser
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/chat" className="hover:underline">
+                    Sladderrommet
+                  </Link>
+                </li>
+              </>
+            ) : null}
             <li>
               <Link href="/nyheter" className="hover:underline">
                 Nyheter
-              </Link>
-            </li>
-            <li>
-              <Link href="/chat" className="hover:underline">
-                Sladderrommet
               </Link>
             </li>
           </ul>
