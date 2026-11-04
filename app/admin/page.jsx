@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { LoginForm } from "@/components/login-form";
+import { AdminGate } from "@/components/admin-gate";
+import { AdminNav } from "@/components/admin-nav";
 import { PageShell } from "@/components/page-shell";
 import { countBuckets, requireAdmin } from "@/lib/admin";
 import { formatNumber } from "@/lib/format";
@@ -12,41 +13,14 @@ export const metadata = {
 export default async function AdminPage() {
   const { user, supabase, ok } = await requireAdmin();
 
-  if (!user) {
-    return (
-      <PageShell>
-        <div className="mx-auto max-w-lg">
-          <p className="kicker">Admin</p>
-          <h1 className="mt-2 font-serif text-3xl">Logg inn for å se statistikken</h1>
-          <p className="mt-3 mb-8 text-muted">Bare administratorer kommer videre herfra.</p>
-          <LoginForm nextPath="/admin" />
-        </div>
-      </PageShell>
-    );
+  if (!user || !ok) {
+    return <AdminGate user={user} ok={ok} nextPath="/admin" />;
   }
 
-  if (!ok) {
-    const grantSql = `update public.profiles
-set is_admin = true
-where id = (
-  select id from auth.users
-  where email = '${user.email ?? "din@epost.no"}'
-  limit 1
-);`;
+  return <Overview supabase={supabase} />;
+}
 
-    return (
-      <PageShell>
-        <p className="kicker">Admin</p>
-        <h1 className="mt-2 font-serif text-3xl">Du er inne, men ikke admin</h1>
-        <p className="mt-3 max-w-xl text-muted">
-          Kjør <code className="text-ink">003_admin.sql</code> i Supabase, og gi deretter din bruker
-          tilgang med SQL under.
-        </p>
-        <pre className="paper-card mt-6 overflow-auto p-4 text-sm">{grantSql}</pre>
-      </PageShell>
-    );
-  }
-
+async function Overview({ supabase }) {
   const [{ data: profiles }, { data: responses }, { data: surveys }] = await Promise.all([
     supabase.from("profiles").select("created_at"),
     supabase.from("survey_responses").select("created_at, survey_id"),
@@ -70,6 +44,7 @@ where id = (
         Tall i norsk tid. Undersøkelser teller innsendte svar — én per person, bedrift og
         undersøkelse.
       </p>
+      <AdminNav current="/admin" />
 
       <section className="mt-10">
         <h2 className="font-serif text-2xl">Brukere</h2>

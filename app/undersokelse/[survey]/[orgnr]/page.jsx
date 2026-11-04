@@ -4,12 +4,17 @@ import { LoginGate } from "@/components/login-gate";
 import { PageShell } from "@/components/page-shell";
 import { SurveyForm } from "@/components/survey-form";
 import { ensureCompany, getSessionUser, getSurveyBySlug, getSurveyResponse } from "@/lib/data";
+import { pageMetadata } from "@/lib/seo";
 import { surveyCountsTowardRanking } from "@/lib/survey";
 
 export async function generateMetadata({ params }) {
-  const { survey: slug } = await params;
+  const { survey: slug, orgnr: raw } = await params;
   const survey = await getSurveyBySlug(decodeURIComponent(slug));
-  return { title: survey?.title ?? "Undersøkelse" };
+  return pageMetadata({
+    title: survey?.title ?? "Undersøkelse",
+    path: `/undersokelse/${decodeURIComponent(slug)}/${decodeURIComponent(raw)}`,
+    index: false,
+  });
 }
 
 export default async function SurveyPage({ params }) {

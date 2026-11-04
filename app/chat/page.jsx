@@ -2,8 +2,13 @@ import { ChatRoom } from "@/components/chat-room";
 import { LoginGate } from "@/components/login-gate";
 import { PageShell } from "@/components/page-shell";
 import { getChatMessages, getSessionUser } from "@/lib/data";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = { title: "Chat" };
+export const metadata = pageMetadata({
+  title: "Chat",
+  path: "/chat",
+  index: false,
+});
 
 export default async function ChatPage() {
   const user = await getSessionUser();

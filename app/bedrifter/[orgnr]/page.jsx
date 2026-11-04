@@ -4,15 +4,28 @@ import { GossipFeed } from "@/components/gossip-feed";
 import { GossipForm } from "@/components/gossip-form";
 import { PageShell } from "@/components/page-shell";
 import { ScoreBadge, ScoreBar } from "@/components/score-badge";
+import { JsonLd } from "@/components/json-ld";
 import { ensureCompany, getCompanyStats, getPosts, getSessionUser, getSurveys } from "@/lib/data";
 import { formatNumber, formatOrgnr } from "@/lib/format";
+import { companyJsonLd, pageMetadata } from "@/lib/seo";
 import { CATEGORIES } from "@/lib/site";
 import { surveyCountsTowardRanking } from "@/lib/survey";
 
 export async function generateMetadata({ params }) {
   const { orgnr } = await params;
   const company = await ensureCompany(decodeURIComponent(orgnr));
-  return { title: company?.name ?? "Bedrift" };
+  if (!company) return { title: "Bedrift" };
+  const stats = await getCompanyStats(company.orgnr);
+  const place = company.municipality ? ` i ${company.municipality}` : "";
+  const scoreBit =
+    stats?.overall_score && stats.response_count >= 3
+      ? ` Score ${stats.overall_score.toFixed(1).replace(".", ",")}/5 fra ${stats.response_count} svar.`
+      : "";
+  return pageMetadata({
+    title: `${company.name} — hvordan er det å jobbe der?`,
+    description: `Les hvordan det er å jobbe i ${company.name}${place}. Arbeidsmiljø, ledelse, lønn og anonym sladder.${scoreBit}`,
+    path: `/bedrifter/${company.orgnr}`,
+  });
 }
 
 export default async function CompanyPage({ params }) {
@@ -32,10 +45,15 @@ export default async function CompanyPage({ params }) {
 
   return (
     <PageShell>
+      <JsonLd data={companyJsonLd(company, stats)} />
       <p className="kicker">{company.is_verified ? "Verifisert i Brreg" : "Manuelt lagt inn"}</p>
       <div className="mt-2 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="font-serif text-4xl leading-tight sm:text-5xl">{company.name}</h1>
+          <p className="mt-2 max-w-2xl text-lg text-muted">
+            Hvordan er det å jobbe i {company.name}? Se score fra arbeidsplassundersøkelsen, og les
+            anonym sladder fra folk som kjenner stedet.
+          </p>
           <p className="mt-3 text-muted">
             {[
               formatOrgnr(company.orgnr),
