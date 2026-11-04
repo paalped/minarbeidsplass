@@ -9,6 +9,9 @@ export function CompanySearch({
   surveySlug = "arbeidsplass-2026",
   size = "lg",
   autoFocus = false,
+  onPick,
+  inputId = "company-search",
+  label = "Søk i Enhetsregisteret",
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -69,11 +72,19 @@ export function CompanySearch({
       });
       const json = await res.json();
       if (!res.ok || !json.company) {
-        if (company.source === "brreg") {
+        if (company.source === "brreg" && !onPick) {
           router.push(dest(company.orgnr));
           return;
         }
         throw new Error(json.error ?? "Kunne ikke lagre bedriften.");
+      }
+      if (onPick) {
+        onPick(json.company);
+        setQuery("");
+        setResults([]);
+        setOpen(false);
+        setManual(false);
+        return;
       }
       const path = dest(json.company.orgnr);
       router.push(path);
@@ -102,12 +113,12 @@ export function CompanySearch({
 
   return (
     <div ref={boxRef} className="w-full">
-      <label className="kicker" htmlFor="company-search">
-        Søk i Enhetsregisteret
+      <label className="kicker" htmlFor={inputId}>
+        {label}
       </label>
       <div className="relative mt-2">
         <input
-          id="company-search"
+          id={inputId}
           value={query}
           autoFocus={autoFocus}
           onChange={(e) => setQuery(e.target.value)}

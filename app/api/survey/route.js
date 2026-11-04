@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { ensureCompany, getSurveyById } from "@/lib/data";
+import { cvRelation } from "@/lib/cv";
+import { ensureCompany, getCvEntries, getSurveyById } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 import { isQuestionComplete, sanitizeAnswers, scoreAnswers } from "@/lib/survey";
 
@@ -26,6 +27,20 @@ export async function POST(request) {
   const company = await ensureCompany(body.company_orgnr ?? "");
   if (!company) {
     return NextResponse.json({ error: "Fant ikke bedriften." }, { status: 404 });
+  }
+
+  const relation = cvRelation(await getCvEntries(user.id), company.orgnr);
+  if (relation === "current") {
+    return NextResponse.json(
+      { error: "Du kan ikke svare om nåværende arbeidsplass. Avslutt jobben i CV-en først." },
+      { status: 403 },
+    );
+  }
+  if (relation !== "previous") {
+    return NextResponse.json(
+      { error: "Du kan bare svare for tidligere arbeidsplasser som ligger i CV-en din." },
+      { status: 403 },
+    );
   }
 
   const answers = sanitizeAnswers(survey.survey_questions, body.answers ?? {});

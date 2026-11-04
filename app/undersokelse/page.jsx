@@ -27,8 +27,8 @@ export default async function SurveyIndexPage() {
       </p>
       <p className="mt-3 max-w-2xl text-muted">
         {user
-          ? "Velg undersøkelse og bedrift. Ett svar per person, bedrift og undersøkelse."
-          : "Du kan lese om undersøkelsene her. For å svare trenger du magisk lenke på e-post."}
+          ? "Velg undersøkelse, deretter en tidligere arbeidsplass fra CV-en. Ett svar per person, bedrift og undersøkelse."
+          : "Du kan lese om undersøkelsene her. For å svare trenger du magisk lenke på e-post og tidligere jobber i CV-en."}
       </p>
 
       {surveys.length === 0 ? (

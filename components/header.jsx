@@ -10,7 +10,10 @@ const publicLinks = [
   { href: "/nyheter", label: "Nyheter" },
 ];
 
-const memberLinks = [{ href: "/chat", label: "Chat" }];
+const memberLinks = [
+  { href: "/profil", label: "Profil" },
+  { href: "/chat", label: "Chat" },
+];
 
 export function Header({ user }) {
   const [open, setOpen] = useState(false);
@@ -39,7 +42,9 @@ export function Header({ user }) {
         <div className="hidden items-center gap-3 md:flex">
           {user ? (
             <>
-              <span className="max-w-36 truncate text-sm text-paper-2">{user.displayName}</span>
+              <Link href="/profil" className="max-w-36 truncate text-sm text-paper-2 hover:text-paper">
+                {user.displayName}
+              </Link>
               <form action="/auth/sign-out" method="post">
                 <button type="submit" className="text-sm underline decoration-rust underline-offset-4">
                   Logg ut
