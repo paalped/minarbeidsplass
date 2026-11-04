@@ -6,13 +6,11 @@ import { useState } from "react";
 const publicLinks = [
   { href: "/bedrifter", label: "Bedrifter" },
   { href: "/karing", label: "Kåring" },
+  { href: "/undersokelse", label: "Undersøkelser" },
   { href: "/nyheter", label: "Nyheter" },
 ];
 
-const memberLinks = [
-  { href: "/undersokelse", label: "Undersøkelser" },
-  { href: "/chat", label: "Chat" },
-];
+const memberLinks = [{ href: "/chat", label: "Chat" }];
 
 export function Header({ user }) {
   const [open, setOpen] = useState(false);

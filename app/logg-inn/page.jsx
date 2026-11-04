@@ -1,8 +1,14 @@
 import { LoginForm } from "@/components/login-form";
 import { PageShell } from "@/components/page-shell";
 import { getSessionUser } from "@/lib/data";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = { title: "Logg inn" };
+export const metadata = pageMetadata({
+  title: "Logg inn",
+  description: "Logg inn med magisk lenke for å ta undersøkelsen og bruke chatten.",
+  path: "/logg-inn",
+  index: false,
+});
 
 function safeNext(value) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) return "/";

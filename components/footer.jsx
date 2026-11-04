@@ -13,36 +13,39 @@ export function Footer({ user }) {
           <p className="kicker text-paper-2">Sider</p>
           <ul className="mt-3 space-y-2">
             <li>
+              <Link href="/bedrifter" className="hover:underline">
+                Finn arbeidsplassen
+              </Link>
+            </li>
+            <li>
               <Link href="/karing" className="hover:underline">
                 Norges beste arbeidsplass
               </Link>
             </li>
-            {user ? (
-              <>
-                <li>
-                  <Link href="/undersokelse" className="hover:underline">
-                    Undersøkelser
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/chat" className="hover:underline">
-                    Sladderrommet
-                  </Link>
-                </li>
-              </>
-            ) : null}
+            <li>
+              <Link href="/undersokelse" className="hover:underline">
+                Arbeidsplassundersøkelsen
+              </Link>
+            </li>
             <li>
               <Link href="/nyheter" className="hover:underline">
                 Nyheter
               </Link>
             </li>
+            {user ? (
+              <li>
+                <Link href="/chat" className="hover:underline">
+                  Sladderrommet
+                </Link>
+              </li>
+            ) : null}
           </ul>
         </div>
         <div className="text-sm text-paper-2">
           <p className="kicker">Om kåringen</p>
           <p className="mt-3 leading-relaxed">
-            Snitt av undersøkelsessvar i syv kategorier. En bedrift kommer på listen når minst
-            tre personer har svart. Firmasøk går mot Enhetsregisteret.
+            For jobbsøkere og ansatte. Snitt av undersøkelsessvar i syv kategorier. En bedrift
+            kommer på listen når minst tre personer har svart. Firmasøk går mot Enhetsregisteret.
           </p>
         </div>
       </div>
