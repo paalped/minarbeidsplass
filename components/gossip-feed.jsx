@@ -16,6 +16,12 @@ export function GossipFeed({ posts }) {
             </time>
           </div>
           <p className="mt-2 whitespace-pre-wrap text-[17px] leading-relaxed">{post.body}</p>
+          {post.reply?.body ? (
+            <div className="mt-4 border-t border-line pt-3">
+              <p className="kicker">Verifisert arbeidsgiver</p>
+              <p className="mt-2 whitespace-pre-wrap leading-relaxed">{post.reply.body}</p>
+            </div>
+          ) : null}
         </li>
       ))}
     </ul>

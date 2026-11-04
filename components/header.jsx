@@ -8,6 +8,7 @@ const publicLinks = [
   { href: "/karing", label: "Kåring" },
   { href: "/undersokelse", label: "Undersøkelser" },
   { href: "/nyheter", label: "Nyheter" },
+  { href: "/bedrift", label: "For bedrifter" },
 ];
 
 const memberLinks = [
