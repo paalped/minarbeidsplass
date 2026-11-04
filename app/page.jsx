@@ -94,6 +94,14 @@ export default async function HomePage() {
             </p>
           </Link>
         </div>
+        <Link href="/bedrift" className="mt-6 block paper-card p-5 hover:bg-white">
+          <p className="kicker">For arbeidsgivere</p>
+          <h3 className="mt-2 font-serif text-2xl">Verifisert svar, ikke sensur</h3>
+          <p className="mt-3 max-w-3xl text-muted">
+            Krev bedriften mot Enhetsregisteret. Svar offisielt på omtaler. Innsikt kommer først ved
+            minst fem anonyme svar, med tidsforsinkelse — og dere kan ikke slette det folk har skrevet.
+          </p>
+        </Link>
       </section>
 
       <section className="mx-auto mt-16 grid max-w-6xl gap-12 px-4 lg:grid-cols-[1fr_1.1fr]">

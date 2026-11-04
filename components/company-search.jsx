@@ -12,6 +12,7 @@ export function CompanySearch({
   onPick,
   inputId = "company-search",
   label = "Søk i Enhetsregisteret",
+  allowManual = true,
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -152,6 +153,7 @@ export function CompanySearch({
           </ul>
         ) : null}
       </div>
+      {allowManual ? (
       <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
         <button
           type="button"
@@ -162,7 +164,10 @@ export function CompanySearch({
         </button>
         {saving ? <span className="text-muted">Lagrer…</span> : null}
       </div>
-      {manual ? (
+      ) : saving ? (
+        <p className="mt-3 text-sm text-muted">Lagrer…</p>
+      ) : null}
+      {allowManual && manual ? (
         <form onSubmit={submitManual} className="paper-card mt-3 grid gap-3 p-4 sm:grid-cols-2">
           <input
             value={manualName}

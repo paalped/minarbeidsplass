@@ -32,6 +32,11 @@ export function Footer({ user }) {
                 Nyheter
               </Link>
             </li>
+            <li>
+              <Link href="/bedrift" className="hover:underline">
+                For bedrifter
+              </Link>
+            </li>
             {user ? (
               <>
                 <li>

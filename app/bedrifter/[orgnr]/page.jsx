@@ -6,6 +6,7 @@ import { GossipForm } from "@/components/gossip-form";
 import { PageShell } from "@/components/page-shell";
 import { ScoreBadge, ScoreBar } from "@/components/score-badge";
 import { JsonLd } from "@/components/json-ld";
+import { getCompanyBranding } from "@/lib/b2b-data";
 import {
   ensureCompany,
   getCompanyCulture,
@@ -44,12 +45,13 @@ export default async function CompanyPage({ params }) {
   const company = await ensureCompany(orgnr);
   if (!company) notFound();
 
-  const [stats, posts, user, surveys, culture] = await Promise.all([
+  const [stats, posts, user, surveys, culture, branding] = await Promise.all([
     getCompanyStats(company.orgnr),
     getPosts(company.orgnr),
     getSessionUser(),
     getSurveys(),
     getCompanyCulture(company.orgnr),
+    getCompanyBranding(company.orgnr),
   ]);
   const relation = user ? cvRelation(await getCvEntries(user.id), company.orgnr) : "none";
   const canSurvey = relation === "previous";
@@ -60,12 +62,20 @@ export default async function CompanyPage({ params }) {
     <PageShell>
       <JsonLd data={companyJsonLd(company, stats)} />
       <p className="kicker">{company.is_verified ? "Verifisert i Brreg" : "Manuelt lagt inn"}</p>
+      {branding?.banner_url ? (
+        <img src={branding.banner_url} alt="" className="mt-4 h-40 w-full object-cover" />
+      ) : null}
       <div className="mt-2 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="font-serif text-4xl leading-tight sm:text-5xl">{company.name}</h1>
+          <div className="flex items-center gap-4">
+            {branding?.logo_url ? (
+              <img src={branding.logo_url} alt="" className="h-14 w-14 object-contain" />
+            ) : null}
+            <h1 className="font-serif text-4xl leading-tight sm:text-5xl">{company.name}</h1>
+          </div>
           <p className="mt-2 max-w-2xl text-lg text-muted">
-            Hvordan er det å jobbe i {company.name}? Se score fra arbeidsplassundersøkelsen, og les
-            anonym sladder fra folk som kjenner stedet.
+            {branding?.intro ||
+              `Hvordan er det å jobbe i ${company.name}? Se score fra arbeidsplassundersøkelsen, og les anonym sladder fra folk som kjenner stedet.`}
           </p>
           <p className="mt-3 text-muted">
             {[
@@ -78,6 +88,14 @@ export default async function CompanyPage({ params }) {
               .filter(Boolean)
               .join(" · ")}
           </p>
+          {branding?.values_text ? (
+            <p className="mt-3 max-w-2xl text-sm text-muted">Verdier: {branding.values_text}</p>
+          ) : null}
+          {branding?.career_url ? (
+            <a href={branding.career_url} className="mt-3 inline-block text-sm text-rust underline" rel="noreferrer">
+              Karriereside
+            </a>
+          ) : null}
         </div>
         <div className="flex w-fit shrink-0 flex-col gap-2 sm:flex-row">
           {user && !canSurvey ? (
