@@ -1,8 +1,9 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { CompanySearch } from "@/components/company-search";
 import { LoginForm } from "@/components/login-form";
 import { PageShell } from "@/components/page-shell";
-import { getSessionUser, getSurveyBySlug } from "@/lib/data";
+import { getCvEntries, getSessionUser, getSurveyBySlug } from "@/lib/data";
+import { companyFromEntry, formatCvPeriod, previousWorkplaces } from "@/lib/cv";
 import { looksLikeCompanyKey } from "@/lib/format";
 import { pageMetadata } from "@/lib/seo";
 import { surveyCountsTowardRanking } from "@/lib/survey";
@@ -36,6 +37,7 @@ export default async function SurveyCompanyPickPage({ params }) {
   if (!survey) notFound();
 
   const nextPath = `/undersokelse/${survey.slug}`;
+  const workplaces = user ? previousWorkplaces(await getCvEntries(user.id)) : [];
 
   return (
     <PageShell>
@@ -44,13 +46,50 @@ export default async function SurveyCompanyPickPage({ params }) {
       </p>
       <h1 className="mt-2 max-w-2xl font-serif text-4xl leading-tight">{survey.title}</h1>
       <p className="mt-4 max-w-xl text-muted">{survey.description}</p>
+      <p className="mt-3 max-w-xl text-muted">
+        Du kan bare svare for tidligere arbeidsplasser i CV-en. Nåværende jobb er unntatt.
+      </p>
       <div className="mt-8 max-w-xl">
         {user ? (
-          <CompanySearch intent="survey" surveySlug={survey.slug} autoFocus />
+          workplaces.length ? (
+            <ul className="divide-y divide-line border border-line bg-white">
+              {workplaces.map((entry) => {
+                const company = companyFromEntry(entry);
+                return (
+                  <li key={entry.id}>
+                    <Link
+                      href={`/undersokelse/${survey.slug}/${company.orgnr}`}
+                      className="block px-4 py-4 hover:bg-paper-2/60"
+                    >
+                      <p className="font-medium">{company.name}</p>
+                      <p className="mt-1 text-sm text-muted">
+                        {[entry.title, formatCvPeriod(entry)].filter(Boolean).join(" · ")}
+                      </p>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <div className="paper-card p-6">
+              <p className="font-serif text-2xl">CV-en mangler tidligere jobber</p>
+              <p className="mt-3 text-muted">
+                Legg inn arbeidsplasser du har sluttet i. Deretter kan du ta undersøkelsen for de
+                stedene.
+              </p>
+              <Link
+                href="/profil"
+                className="mt-6 inline-flex h-11 items-center bg-rust px-4 text-paper hover:bg-rust-dark"
+              >
+                Gå til profilen
+              </Link>
+            </div>
+          )
         ) : (
           <>
             <p className="mb-6 text-muted">
-              Søk opp bedriften og svar etter innlogging. Magisk lenke på e-post, ingen passord.
+              Logg inn, og velg blant tidligere arbeidsplasser i CV-en. Magisk lenke på e-post,
+              ingen passord.
             </p>
             <LoginForm nextPath={nextPath} />
           </>

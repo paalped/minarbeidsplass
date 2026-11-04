@@ -5,8 +5,9 @@ import { GossipForm } from "@/components/gossip-form";
 import { PageShell } from "@/components/page-shell";
 import { ScoreBadge, ScoreBar } from "@/components/score-badge";
 import { JsonLd } from "@/components/json-ld";
-import { ensureCompany, getCompanyStats, getPosts, getSessionUser, getSurveys } from "@/lib/data";
+import { ensureCompany, getCompanyStats, getCvEntries, getPosts, getSessionUser, getSurveys } from "@/lib/data";
 import { formatNumber, formatOrgnr } from "@/lib/format";
+import { cvRelation } from "@/lib/cv";
 import { companyJsonLd, pageMetadata } from "@/lib/seo";
 import { CATEGORIES } from "@/lib/site";
 import { surveyCountsTowardRanking } from "@/lib/survey";
@@ -40,6 +41,8 @@ export default async function CompanyPage({ params }) {
     getSessionUser(),
     getSurveys(),
   ]);
+  const relation = user ? cvRelation(await getCvEntries(user.id), company.orgnr) : "none";
+  const canSurvey = relation === "previous";
 
   const categoryScores = stats ? categoryEntries(stats) : [];
 
@@ -67,8 +70,18 @@ export default async function CompanyPage({ params }) {
           </p>
         </div>
         <div className="flex w-fit shrink-0 flex-col gap-2 sm:flex-row">
-          {(surveys.length > 0 ? surveys : [{ slug: "arbeidsplass-2026", title: "Ta undersøkelsen", counts_toward_ranking: true }]).map(
-            (survey) => {
+          {user && !canSurvey ? (
+            <Link
+              href="/profil"
+              className="inline-flex h-12 shrink-0 items-center justify-center whitespace-nowrap bg-rust px-5 text-paper hover:bg-rust-dark"
+            >
+              {relation === "current" ? "Avslutt jobben i CV-en for å svare" : "Legg inn i CV for å svare"}
+            </Link>
+          ) : (
+            (surveys.length > 0
+              ? surveys
+              : [{ slug: "arbeidsplass-2026", title: "Ta undersøkelsen", counts_toward_ranking: true }]
+            ).map((survey) => {
               const ranking = surveyCountsTowardRanking(survey);
               return (
                 <Link
@@ -83,7 +96,7 @@ export default async function CompanyPage({ params }) {
                   {survey.title}
                 </Link>
               );
-            },
+            })
           )}
         </div>
       </div>

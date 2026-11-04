@@ -33,11 +33,18 @@ export function Footer({ user }) {
               </Link>
             </li>
             {user ? (
-              <li>
-                <Link href="/chat" className="hover:underline">
-                  Sladderrommet
-                </Link>
-              </li>
+              <>
+                <li>
+                  <Link href="/profil" className="hover:underline">
+                    Profil og CV
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/chat" className="hover:underline">
+                    Sladderrommet
+                  </Link>
+                </li>
+              </>
             ) : null}
           </ul>
         </div>

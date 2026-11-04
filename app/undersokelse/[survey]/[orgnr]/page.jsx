@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { LoginGate } from "@/components/login-gate";
 import { PageShell } from "@/components/page-shell";
 import { SurveyForm } from "@/components/survey-form";
-import { ensureCompany, getSessionUser, getSurveyBySlug, getSurveyResponse } from "@/lib/data";
+import { cvRelation } from "@/lib/cv";
+import { ensureCompany, getCvEntries, getSessionUser, getSurveyBySlug, getSurveyResponse } from "@/lib/data";
 import { pageMetadata } from "@/lib/seo";
 import { surveyCountsTowardRanking } from "@/lib/survey";
 
@@ -44,6 +45,28 @@ export default async function SurveyPage({ params }) {
         }
         nextPath={nextPath}
       />
+    );
+  }
+
+  const relation = cvRelation(await getCvEntries(user.id), company.orgnr);
+  if (relation !== "previous") {
+    return (
+      <PageShell>
+        <div className="mx-auto max-w-2xl">
+          <p className="kicker">{survey.title}</p>
+          <h1 className="mt-2 font-serif text-4xl">Ikke åpen for {company.name}</h1>
+          <p className="mt-4 text-muted">
+            {relation === "current"
+              ? "Dette er nåværende arbeidsplass i CV-en din. Du kan svare når jobben er avsluttet."
+              : "Du kan bare ta undersøkelsen for tidligere arbeidsplasser som ligger i CV-en."}
+          </p>
+          <p className="mt-6">
+            <Link href="/profil" className="inline-flex h-11 items-center bg-rust px-4 text-paper hover:bg-rust-dark">
+              Gå til profilen
+            </Link>
+          </p>
+        </div>
+      </PageShell>
     );
   }
 
