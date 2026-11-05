@@ -53,6 +53,9 @@ export const metadata = {
     description: site.description,
   },
   robots: { index: true, follow: true },
+  verification: {
+    google: "H0ar7eqiiXdlCBxBIcYc3n7QATs_xZqicpl4rfbS82A",
+  },
 };
 
 export default async function RootLayout({ children }) {
