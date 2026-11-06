@@ -4,6 +4,7 @@ import { ensureCompany, getCvEntries, getSurveyById } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 import { extractFitScores } from "@/lib/fit";
 import { isQuestionComplete, sanitizeAnswers, scoreAnswers } from "@/lib/survey";
+import { isUserSurvey } from "@/lib/user-surveys";
 
 export async function POST(request) {
   const supabase = await createClient();
@@ -25,23 +26,29 @@ export async function POST(request) {
     return NextResponse.json({ error: "Ugyldig undersøkelse." }, { status: 400 });
   }
 
+  if (isUserSurvey(survey) && (survey.status !== "published" || survey.counts_toward_ranking)) {
+    return NextResponse.json({ error: "Undersøkelsen er ikke åpen for svar." }, { status: 403 });
+  }
+
   const company = await ensureCompany(body.company_orgnr ?? "");
   if (!company) {
     return NextResponse.json({ error: "Fant ikke bedriften." }, { status: 404 });
   }
 
-  const relation = cvRelation(await getCvEntries(user.id), company.orgnr);
-  if (relation === "current") {
-    return NextResponse.json(
-      { error: "Du kan ikke svare om nåværende arbeidsplass. Avslutt jobben i CV-en først." },
-      { status: 403 },
-    );
-  }
-  if (relation !== "previous") {
-    return NextResponse.json(
-      { error: "Du kan bare svare for tidligere arbeidsplasser som ligger i CV-en din." },
-      { status: 403 },
-    );
+  if (!isUserSurvey(survey)) {
+    const relation = cvRelation(await getCvEntries(user.id), company.orgnr);
+    if (relation === "current") {
+      return NextResponse.json(
+        { error: "Du kan ikke svare om nåværende arbeidsplass. Avslutt jobben i CV-en først." },
+        { status: 403 },
+      );
+    }
+    if (relation !== "previous") {
+      return NextResponse.json(
+        { error: "Du kan bare svare for tidligere arbeidsplasser som ligger i CV-en din." },
+        { status: 403 },
+      );
+    }
   }
 
   const answers = sanitizeAnswers(survey.survey_questions, body.answers ?? {});

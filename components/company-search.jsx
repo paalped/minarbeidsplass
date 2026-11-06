@@ -7,6 +7,7 @@ import { formatOrgnr } from "@/lib/format";
 export function CompanySearch({
   intent = "view",
   surveySlug = "arbeidsplass-2026",
+  pathPrefix,
   size = "lg",
   autoFocus = false,
   onPick,
@@ -57,6 +58,7 @@ export function CompanySearch({
   }, []);
 
   function dest(orgnr) {
+    if (pathPrefix) return `${pathPrefix.replace(/\/$/, "")}/${orgnr}`;
     return intent === "survey"
       ? `/undersokelse/${surveySlug}/${orgnr}`
       : `/bedrifter/${orgnr}`;

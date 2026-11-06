@@ -10,6 +10,7 @@ import {
   questionsByCategory,
   surveyCountsTowardRanking,
 } from "@/lib/survey";
+import { isUserSurvey, userSurveySharePath } from "@/lib/user-surveys";
 
 export function SurveyForm({ company, survey, existing }) {
   const router = useRouter();
@@ -39,6 +40,7 @@ export function SurveyForm({ company, survey, existing }) {
   const current = visibleGroups[Math.min(step, Math.max(0, visibleGroups.length - 1))];
   const isLast = step >= visibleGroups.length - 1;
   const counts = surveyCountsTowardRanking(survey);
+  const custom = isUserSurvey(survey);
 
   function setValue(id, value) {
     setAnswers((prev) => ({ ...prev, [id]: value }));
@@ -81,10 +83,15 @@ export function SurveyForm({ company, survey, existing }) {
         <p className="mt-3 text-muted">
           {counts
             ? `De teller i kåringen av ${company.name}. Du kan oppdatere dem senere ved å ta undersøkelsen på nytt.`
-            : `De bygger verktøykartet for ${company.name}, og teller ikke i kåringen. Du kan oppdatere dem senere.`}
+            : custom
+              ? `De går til den som laget undersøkelsen som et tall, uten navn. De teller ikke i kåringen.`
+              : `De bygger verktøykartet for ${company.name}, og teller ikke i kåringen. Du kan oppdatere dem senere.`}
         </p>
-        <a href={`/bedrifter/${company.orgnr}`} className="mt-6 inline-block bg-pine px-5 py-2 text-paper">
-          Tilbake til bedriften
+        <a
+          href={custom && survey.share_token ? userSurveySharePath(survey.share_token) : `/bedrifter/${company.orgnr}`}
+          className="mt-6 inline-block bg-pine px-5 py-2 text-paper"
+        >
+          {custom ? "Tilbake" : "Tilbake til bedriften"}
         </a>
       </div>
     );
