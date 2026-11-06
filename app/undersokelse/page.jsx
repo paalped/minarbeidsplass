@@ -32,6 +32,27 @@ export default async function SurveyIndexPage() {
           : "Du kan lese om undersøkelsene her. For å svare trenger du magisk lenke på e-post og tidligere jobber i CV-en."}
       </p>
 
+      <p className="mt-6 max-w-2xl text-sm">
+        {user ? (
+          <>
+            <Link href="/mine-undersokelser" className="text-rust underline">
+              Lag din egen undersøkelse
+            </Link>
+            {". Den teller ikke i kåringen, og du ser bare hvor mange som har svart."}
+          </>
+        ) : (
+          <>
+            <Link
+              href={`/logg-inn?next=${encodeURIComponent("/mine-undersokelser")}`}
+              className="text-rust underline"
+            >
+              Logg inn og lag din egen undersøkelse
+            </Link>
+            {". Den teller ikke i kåringen, og du ser bare hvor mange som har svart."}
+          </>
+        )}
+      </p>
+
       {surveys.length === 0 ? (
         <p className="mt-10 text-muted">
           Ingen undersøkelser er lastet inn. Kjør SQL-migrasjonen i Supabase.

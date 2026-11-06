@@ -45,6 +45,11 @@ export function Footer({ user }) {
                   </Link>
                 </li>
                 <li>
+                  <Link href="/mine-undersokelser" className="hover:underline">
+                    Mine undersøkelser
+                  </Link>
+                </li>
+                <li>
                   <Link href="/chat" className="hover:underline">
                     Sladderrommet
                   </Link>

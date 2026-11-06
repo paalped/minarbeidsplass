@@ -21,11 +21,13 @@ export default async function AdminPage() {
 }
 
 async function Overview({ supabase }) {
-  const [{ data: profiles }, { data: responses }, { data: surveys }] = await Promise.all([
+  const [{ data: profiles }, { data: responses }, official, allSurveys] = await Promise.all([
     supabase.from("profiles").select("created_at"),
     supabase.from("survey_responses").select("created_at, survey_id"),
+    supabase.from("surveys").select("id, slug, title").is("owner_id", null),
     supabase.from("surveys").select("id, slug, title"),
   ]);
+  const surveys = official.error ? allSurveys.data : official.data;
 
   const users = countBuckets((profiles ?? []).map((row) => row.created_at));
   const taken = countBuckets((responses ?? []).map((row) => row.created_at));

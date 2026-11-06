@@ -10,8 +10,9 @@ import {
   questionsByCategory,
   surveyCountsTowardRanking,
 } from "@/lib/survey";
+import { isUserSurvey, userSurveySharePath } from "@/lib/user-surveys";
 
-export function SurveyForm({ company, survey, existing }) {
+export function SurveyForm({ company, survey, existing, preview = false, backHref }) {
   const router = useRouter();
   const questions = survey.survey_questions ?? [];
   const groups = useMemo(() => questionsByCategory(questions), [questions]);
@@ -39,6 +40,7 @@ export function SurveyForm({ company, survey, existing }) {
   const current = visibleGroups[Math.min(step, Math.max(0, visibleGroups.length - 1))];
   const isLast = step >= visibleGroups.length - 1;
   const counts = surveyCountsTowardRanking(survey);
+  const custom = isUserSurvey(survey);
 
   function setValue(id, value) {
     setAnswers((prev) => ({ ...prev, [id]: value }));
@@ -50,6 +52,10 @@ export function SurveyForm({ company, survey, existing }) {
   }
 
   async function submit() {
+    if (preview) {
+      setDone(true);
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -74,17 +80,33 @@ export function SurveyForm({ company, survey, existing }) {
   }
 
   if (done) {
+    const previewBack = backHref ?? `/mine-undersokelser/${survey.id}`;
     return (
       <div className="paper-card p-8 text-center">
-        <p className="kicker">Takk</p>
-        <h2 className="mt-2 font-serif text-3xl">Svarene dine er inne</h2>
+        <p className="kicker">{preview ? "Test" : "Takk"}</p>
+        <h2 className="mt-2 font-serif text-3xl">
+          {preview ? "Slik oppleves undersøkelsen" : "Svarene dine er inne"}
+        </h2>
         <p className="mt-3 text-muted">
-          {counts
-            ? `De teller i kåringen av ${company.name}. Du kan oppdatere dem senere ved å ta undersøkelsen på nytt.`
-            : `De bygger verktøykartet for ${company.name}, og teller ikke i kåringen. Du kan oppdatere dem senere.`}
+          {preview
+            ? "Ingen svar ble lagret. Gå tilbake og juster, eller publiser når du er fornøyd."
+            : counts
+              ? `De teller i kåringen av ${company.name}. Du kan oppdatere dem senere ved å ta undersøkelsen på nytt.`
+              : custom
+                ? `De går til den som laget undersøkelsen som et tall, uten navn. De teller ikke i kåringen.`
+                : `De bygger verktøykartet for ${company.name}, og teller ikke i kåringen. Du kan oppdatere dem senere.`}
         </p>
-        <a href={`/bedrifter/${company.orgnr}`} className="mt-6 inline-block bg-pine px-5 py-2 text-paper">
-          Tilbake til bedriften
+        <a
+          href={
+            preview
+              ? previewBack
+              : custom && survey.share_token
+                ? userSurveySharePath(survey.share_token)
+                : `/bedrifter/${company.orgnr}`
+          }
+          className="mt-6 inline-block bg-pine px-5 py-2 text-paper"
+        >
+          {preview ? "Tilbake til kladden" : custom ? "Tilbake" : "Tilbake til bedriften"}
         </a>
       </div>
     );
@@ -142,7 +164,15 @@ export function SurveyForm({ company, survey, existing }) {
           disabled={!canProceed() || saving}
           className="bg-rust px-5 py-2.5 text-paper hover:bg-rust-dark disabled:opacity-50"
         >
-          {isLast ? (saving ? "Lagrer…" : existing ? "Oppdater svar" : "Send inn") : "Neste"}
+          {isLast
+            ? preview
+              ? "Fullfør test"
+              : saving
+                ? "Lagrer…"
+                : existing
+                  ? "Oppdater svar"
+                  : "Send inn"
+            : "Neste"}
         </button>
       </div>
       {error ? <p className="mt-4 text-sm text-rust">{error}</p> : null}

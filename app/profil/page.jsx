@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CurrentSection, PreviousSection } from "@/components/cv-sections";
 import { LoginGate } from "@/components/login-gate";
 import { PageShell } from "@/components/page-shell";
@@ -40,6 +41,20 @@ export default async function ProfilePage() {
         svare om den før den er avsluttet.
       </p>
       <p className="mt-2 text-sm text-muted">{user.email}</p>
+
+      <section className="mt-10">
+        <h2 className="font-serif text-2xl">Egne undersøkelser</h2>
+        <p className="mt-2 max-w-2xl text-muted">
+          Lag en kladd, publiser og del en lenke. De som svarer må logge inn. Du ser bare antallet
+          svar, aldri hvem. Teller ikke i kåringen.
+        </p>
+        <Link
+          href="/mine-undersokelser"
+          className="mt-4 inline-flex h-11 items-center bg-pine px-4 text-paper hover:bg-pine-soft"
+        >
+          Mine undersøkelser
+        </Link>
+      </section>
 
       <section className="mt-10">
         <h2 className="font-serif text-2xl">Kallenavn</h2>
