@@ -37,8 +37,8 @@ export default async function EditUserSurveyPage({ params }) {
       </p>
       <h1 className="mt-2 font-serif text-4xl">Bygg undersøkelsen</h1>
       <p className="mt-3 max-w-2xl text-muted">
-        Lagre kladd så ofte du vil. Publiser når den er ferdig. Svarene teller ikke i kåringen, og
-        du får aldri se hvem som har svart.
+        Lagre kladd så ofte du vil. Test hvordan den oppleves før du publiserer — testdata lagres
+        ikke. Svarene teller ikke i kåringen, og du får aldri se hvem som har svart.
       </p>
       <UserSurveyEditor survey={survey} responseCount={counts[survey.id] ?? 0} />
     </PageShell>

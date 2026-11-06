@@ -55,9 +55,14 @@ export default async function MySurveysPage() {
                   {userSurveyStatusLabel(survey.status)} · {formatNumber(counts[survey.id] ?? 0)} svar
                 </p>
               </div>
-              <Link href={`/mine-undersokelser/${survey.id}`} className="text-sm text-rust underline">
-                Åpne
-              </Link>
+              <div className="flex gap-4 text-sm">
+                <Link href={`/mine-undersokelser/${survey.id}/test`} className="text-muted underline">
+                  Test
+                </Link>
+                <Link href={`/mine-undersokelser/${survey.id}`} className="text-rust underline">
+                  Åpne
+                </Link>
+              </div>
             </li>
           ))}
         </ul>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { LIKERT_LABELS } from "@/lib/site";
 import {
   blankQuestion,
   questionsForEditor,
@@ -94,6 +95,16 @@ export function UserSurveyEditor({ survey, responseCount = 0 }) {
       setError(err instanceof Error ? err.message : "Noe gikk galt.");
       setSaving(false);
     }
+  }
+
+  async function testSurvey() {
+    const saved = await save();
+    if (!saved) return;
+    if (!(saved.survey_questions ?? []).length) {
+      setError("Legg inn minst ett spørsmål og lagre før du tester.");
+      return;
+    }
+    router.push(`/mine-undersokelser/${survey.id}/test`);
   }
 
   async function copyLink() {
@@ -211,19 +222,57 @@ export function UserSurveyEditor({ survey, responseCount = 0 }) {
                 Påkrevd
               </label>
               {question.question_type === "likert" ? (
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <input
-                    value={question.poles.low}
-                    onChange={(e) => updateQuestion(question.id, { poles: { ...question.poles, low: e.target.value } })}
-                    placeholder="Venstre (f.eks. Svært uenig)"
-                    className={field}
-                  />
-                  <input
-                    value={question.poles.high}
-                    onChange={(e) => updateQuestion(question.id, { poles: { ...question.poles, high: e.target.value } })}
-                    placeholder="Høyre (f.eks. Svært enig)"
-                    className={field}
-                  />
+                <div className="mt-4">
+                  <p className="text-sm text-muted">
+                    De som svarer trykker 1, 2, 3, 4 eller 5. Du navngir bare ytterpunktene. Uenig,
+                    nøytral og enig ligger automatisk imellom — de er ikke egne felt.
+                  </p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <label className="text-sm">
+                      Hva 1 betyr
+                      <input
+                        value={question.poles.low}
+                        onChange={(e) =>
+                          updateQuestion(question.id, { poles: { ...question.poles, low: e.target.value } })
+                        }
+                        placeholder={LIKERT_LABELS[0]}
+                        className={field}
+                      />
+                    </label>
+                    <label className="text-sm">
+                      Hva 5 betyr
+                      <input
+                        value={question.poles.high}
+                        onChange={(e) =>
+                          updateQuestion(question.id, { poles: { ...question.poles, high: e.target.value } })
+                        }
+                        placeholder={LIKERT_LABELS[4]}
+                        className={field}
+                      />
+                    </label>
+                  </div>
+                  <div className="mt-4 border border-line bg-white p-3">
+                    <p className="kicker">Slik ser det ut</p>
+                    <div className="mt-3 flex gap-2">
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <span
+                          key={n}
+                          className="flex h-12 flex-1 items-center justify-center border border-line text-lg"
+                        >
+                          {n}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="mt-2 flex justify-between gap-4 text-xs text-muted">
+                      <span>{question.poles.low.trim() || LIKERT_LABELS[0]}</span>
+                      <span className="text-right">{question.poles.high.trim() || LIKERT_LABELS[4]}</span>
+                    </div>
+                    <p className="mt-3 text-xs text-muted">
+                      1 {question.poles.low.trim() || LIKERT_LABELS[0]} · 2 {LIKERT_LABELS[1]} · 3{" "}
+                      {LIKERT_LABELS[2]} · 4 {LIKERT_LABELS[3]} · 5{" "}
+                      {question.poles.high.trim() || LIKERT_LABELS[4]}
+                    </p>
+                  </div>
                 </div>
               ) : null}
               {question.question_type === "single" ? (
@@ -289,6 +338,14 @@ export function UserSurveyEditor({ survey, responseCount = 0 }) {
           >
             {saving ? "Lagrer…" : "Lagre kladd"}
           </button>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => void testSurvey()}
+            className="h-12 border border-pine px-5 text-pine hover:bg-paper-2 disabled:opacity-50"
+          >
+            Lagre og test
+          </button>
           {published ? (
             <button
               type="button"
@@ -319,9 +376,25 @@ export function UserSurveyEditor({ survey, responseCount = 0 }) {
           <p className="kicker">Status</p>
           <p className="mt-2 font-serif text-3xl">{userSurveyStatusLabel(status)}</p>
           <p className="mt-3 text-muted">
-            Kladden er bare synlig for deg. Publisert får du en lenke andre kan åpne. De må logge inn
-            for å svare, og det teller ikke i kåringen.
+            Kladden er bare synlig for deg. Test den før du publiserer — svarene i testen lagres
+            ikke. Publisert får du en lenke andre kan åpne. De må logge inn, og det teller ikke i
+            kåringen.
           </p>
+        </div>
+        <div className="paper-card p-6">
+          <p className="kicker">Test</p>
+          <p className="mt-3 text-muted">
+            Gå gjennom undersøkelsen slik den som får lenken gjør. Svarene dine i testen telles
+            ikke.
+          </p>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => void testSurvey()}
+            className="mt-4 h-11 border border-pine px-4 text-pine hover:bg-paper-2 disabled:opacity-50"
+          >
+            Lagre og test
+          </button>
         </div>
         <div className="paper-card p-6">
           <p className="kicker">Svar</p>
