@@ -7,7 +7,7 @@ const publicLinks = [
   { href: "/bedrifter", label: "Bedrifter" },
   { href: "/karing", label: "Kåring" },
   { href: "/undersokelse", label: "Undersøkelser" },
-  { href: "/nyheter", label: "Nyheter" },
+  { href: "/artikler", label: "Artikler" },
   { href: "/bedrift", label: "For bedrifter" },
 ];
 
