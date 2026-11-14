@@ -10,6 +10,8 @@ export function AdminNewsForm({ article }) {
   const [title, setTitle] = useState(article?.title ?? "");
   const [slug, setSlug] = useState(article?.slug ?? "");
   const [slugLocked, setSlugLocked] = useState(Boolean(article?.slug));
+  const [kind, setKind] = useState(article?.kind ?? "sak");
+  const [searchQuery, setSearchQuery] = useState(article?.search_query ?? "");
   const [excerpt, setExcerpt] = useState(article?.excerpt ?? "");
   const [body, setBody] = useState(article?.body ?? "");
   const [publishedAt, setPublishedAt] = useState(
@@ -34,6 +36,8 @@ export function AdminNewsForm({ article }) {
         body: JSON.stringify({
           title,
           slug,
+          kind,
+          search_query: searchQuery,
           excerpt,
           body,
           published_at: publishedAt,
@@ -97,11 +101,39 @@ export function AdminNewsForm({ article }) {
           required
           className={`h-11 ${field}`}
         />
-        <p className="mt-1 text-xs text-muted">/nyheter/{slug || "…"}</p>
+        <p className="mt-1 text-xs text-muted">/artikler/{slug || "…"}</p>
+      </div>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label htmlFor="news-kind" className="text-sm font-medium">
+            Type
+          </label>
+          <select
+            id="news-kind"
+            value={kind}
+            onChange={(e) => setKind(e.target.value)}
+            className={`h-11 ${field}`}
+          >
+            <option value="sak">Sak</option>
+            <option value="artikkel">Artikkel</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="news-query" className="text-sm font-medium">
+            Søkeord (valgfritt)
+          </label>
+          <input
+            id="news-query"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="ny jobb"
+            className={`h-11 ${field}`}
+          />
+        </div>
       </div>
       <div>
         <label htmlFor="news-excerpt" className="text-sm font-medium">
-          Ingress
+          Ingress — den følelsesladde setningen
         </label>
         <textarea
           id="news-excerpt"

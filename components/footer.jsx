@@ -28,8 +28,8 @@ export function Footer({ user }) {
               </Link>
             </li>
             <li>
-              <Link href="/nyheter" className="hover:underline">
-                Nyheter
+              <Link href="/artikler" className="hover:underline">
+                Artikler
               </Link>
             </li>
             <li>

@@ -120,19 +120,19 @@ export default async function HomePage() {
         </div>
         <div>
           <div className="flex items-baseline justify-between">
-            <h2 className="font-serif text-2xl">Nyheter</h2>
-            <Link href="/nyheter" className="text-sm text-rust underline underline-offset-4">
-              Alle saker
+            <h2 className="font-serif text-2xl">Artikler</h2>
+            <Link href="/artikler" className="text-sm text-rust underline underline-offset-4">
+              Alle artikler
             </Link>
           </div>
           {news.length ? (
             <div className="mt-4">
               {news.map((article) => (
-                <NewsCard key={article.id} article={article} />
+                <NewsCard key={article.slug} article={article} />
               ))}
             </div>
           ) : (
-            <p className="mt-4 text-muted">Ingen nyheter ennå. Kjør SQL-migrasjonen for å se saker.</p>
+            <p className="mt-4 text-muted">Ingen artikler ennå.</p>
           )}
         </div>
       </section>

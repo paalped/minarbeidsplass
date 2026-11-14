@@ -4,7 +4,7 @@ import { pageUrl } from "@/lib/seo";
 export default async function sitemap() {
   const now = new Date();
   const [news, rankings, companies, surveys] = await Promise.all([
-    getNews(100),
+    getNews(250),
     getRankings(200),
     getRecentCompanies(500),
     getSurveys(),
@@ -15,7 +15,7 @@ export default async function sitemap() {
     { path: "/bedrifter", changeFrequency: "daily", priority: 0.9 },
     { path: "/karing", changeFrequency: "daily", priority: 0.9 },
     { path: "/undersokelse", changeFrequency: "weekly", priority: 0.9 },
-    { path: "/nyheter", changeFrequency: "weekly", priority: 0.7 },
+    { path: "/artikler", changeFrequency: "weekly", priority: 0.8 },
   ].map((route) => ({
     url: pageUrl(route.path),
     lastModified: now,
@@ -31,7 +31,7 @@ export default async function sitemap() {
   }));
 
   const newsRoutes = news.map((article) => ({
-    url: pageUrl(`/nyheter/${article.slug}`),
+    url: pageUrl(`/artikler/${article.slug}`),
     lastModified: article.published_at ? new Date(article.published_at) : now,
     changeFrequency: "monthly",
     priority: 0.6,
